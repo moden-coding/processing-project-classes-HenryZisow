@@ -33,6 +33,7 @@ public class Brick {
         if (!alive) {
             return;
         }
+        
         canvas.fill(brickColor);
         canvas.rect(brickX, brickY, brickWidth, brickHeight);
     }
