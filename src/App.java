@@ -12,18 +12,17 @@ public class App extends PApplet {
     private int score = 0;
     private int highscore = 0;
     private int totalBricks;
-    private int scene = 1;
+    private int scene = 3;
+    private boolean gotHighScore;
 
     public static void main(String[] args) {
         PApplet.main("App");
     }
 
     public void setup() {
-        if (scene == 1) {
-            readHighScore();
-            totalBricks = 5 * 9;
-            bricks = Brick.createBricks(this, 5, 9, 70, 33, 6, 55, 50);
-        }
+        readHighScore();
+        totalBricks = 5 * 9;
+        bricks = Brick.createBricks(this, 5, 9, 70, 33, 6, 55, 50);
 
     }
 
@@ -45,6 +44,8 @@ public class App extends PApplet {
     }
 
     public void draw() {
+
+        background(200);
         if (scene == 1) {
             background(200);
 
@@ -53,17 +54,6 @@ public class App extends PApplet {
 
             ball.update();
             ball.display();
-
-            for (Brick b : bricks) {
-                if (ball.ballTouchingBrick(b) == true) {
-                    b.destroy();
-                    ball.bounceOffBrick(b);
-                    totalBricks--;
-                    score++;
-                    break;
-                }
-                b.display();
-            }
 
             for (int i = bricks.size() - 1; i >= 0; i--) {
                 Brick b = bricks.get(i);
@@ -86,11 +76,6 @@ public class App extends PApplet {
                 ball.bounce();
             }
 
-            if (score > highscore) {
-                highscore = score;
-                saveHighScore();
-            }
-
             fill(0);
             PFont font;
             font = createFont("font1.ttf", 128);
@@ -101,7 +86,12 @@ public class App extends PApplet {
             text("High Score: " + highscore, 20, 580);
         }
 
-        if (ball.isDead() == true) {
+        if (scene == 1 && ball.isDead()) {
+            if (score > highscore) {
+                gotHighScore = true;
+                highscore = score;
+                saveHighScore();
+            }
             scene = 2;
         }
 
@@ -120,6 +110,31 @@ public class App extends PApplet {
             fill(255);
             text("Score: " + score, width / 2, height / 2 + 31);
             text("Press R to Restart", width / 2, height / 2 + 80);
+
+            if (gotHighScore == true) {
+                textSize(35);
+                fill(0, 255, 0);
+                text("You Got the High Score!", width / 2, height / 2 + 130);
+            }
+        }
+
+        if (scene == 3) {
+            background(40);
+            fill(255, 126, 0);
+            PFont font;
+            font = createFont("font1.ttf", 128);
+            textFont(font);
+            textAlign(CENTER);
+
+            textSize(75);
+            text("BREAKOUT", width / 2, height / 2 - 60);
+
+            textSize(30);
+            fill(255);
+            text("Move paddle: Mouse", width / 2, height / 2 + 45);
+
+            fill(0, 200, 30);
+            text("Press SPACE to start", width / 2, height / 2 + 130);
         }
 
     }
@@ -142,8 +157,10 @@ public class App extends PApplet {
 
     public void restartGame() {
         score = 0;
+        totalBricks = 5 * 9;
         bricks = Brick.createBricks(this, 5, 9, 70, 33, 6, 55, 50);
         ball.reset();
+        ball.ballGoToPaddle();
         scene = 1;
     }
 
@@ -152,6 +169,10 @@ public class App extends PApplet {
 
             restartGame();
             ball.reset();
+        }
+
+        if (scene == 3 && key == ' ') {
+            restartGame();
         }
     }
 

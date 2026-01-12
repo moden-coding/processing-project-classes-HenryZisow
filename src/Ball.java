@@ -1,4 +1,7 @@
 import processing.core.*;
+import java.util.*;
+import java.io.PrintWriter;
+import java.nio.file.Paths;
 
 public class Ball {
     private PApplet canvas;
@@ -8,6 +11,7 @@ public class Ball {
     private Paddle paddle;
     private float xSpeed = 6;
     private float ySpeed = -6;
+    
 
     public Ball(PApplet c, Paddle paddle) {
         canvas = c;
@@ -56,12 +60,15 @@ public class Ball {
     public void update() {
         ballX += xSpeed;
         ballY += ySpeed;
+        
         // ballX = canvas.mouseX;
         // ballY = canvas.mouseY;
 
         if (ballX < ballSize / 2 || ballX > canvas.width - ballSize / 2) {
             xSpeed *= -1;
-        } else if (ballY <= ballSize / 2 && ySpeed < 0) {
+        }
+        
+        if (ballY <= ballSize / 2 && ySpeed < 0) {
             ySpeed *= -1;
             ballY = ballSize / 2;
         }
