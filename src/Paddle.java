@@ -37,6 +37,7 @@ public class Paddle {
     }
 
     public void update() {
+        canvas.fill(255);
         paddleX = canvas.mouseX - paddleWidth / 2;
         if (paddleX < 0) {
             paddleX = 0;

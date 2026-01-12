@@ -8,10 +8,11 @@ public class Brick {
     private float brickY = 100;
     private int brickWidth = 50;
     private int brickHeight = 30;
-    private int brickCount = 0;
+    private int brickCount;
     private float r, g, b;
     private int brickColor;
     private boolean alive = true;
+    
 
     public Brick(PApplet c, float x, float y, int width, int height) {
         canvas = c;
@@ -46,7 +47,6 @@ public class Brick {
             for (int b = 0; b < columns; b++) {
                 float x = startX + b * (brickWidth + spacing);
                 float y = startY + i * (brickHeight + spacing);
-
                 bricks.add(new Brick(canvas, x, y, brickWidth, brickHeight));
             }
         }
