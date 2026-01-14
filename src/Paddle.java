@@ -45,19 +45,4 @@ public class Paddle {
             paddleX = canvas.width - paddleWidth;
         }
     }
-
-    // public void paddleRight() {
-    // paddleX += paddleSpeed;
-    // if (paddleX + paddleWidth > canvas.width) {
-    // paddleX = canvas.width-paddleWidth;
-    // }
-    // }
-
-    // public void paddleLeft() {
-    // paddleX -= paddleSpeed;
-    // if (paddleX < 0) {
-    // paddleX = 0;
-    // }
-    // }
-
 }

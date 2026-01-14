@@ -1,14 +1,13 @@
 import processing.core.*;
-
 import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.*;
 
 public class App extends PApplet {
-    ArrayList<Brick> bricks = new ArrayList<>();
-    // ArrayList<Ball> balls = new ArrayList<>();
-    Paddle paddle = new Paddle(this);
-    Ball ball = new Ball(this, paddle);
+    private ArrayList<Brick> bricks = new ArrayList<>();
+    private ArrayList<Ball> balls = new ArrayList<>();
+    private ArrayList<Powerup> powerups = new ArrayList<>();
+    private Paddle paddle = new Paddle(this);
     private int score = 0;
     private int highscore = 0;
     private int totalBricks;
@@ -21,6 +20,10 @@ public class App extends PApplet {
 
     public void setup() {
         readHighScore();
+
+        balls.clear();
+        balls.add(new Ball(this, paddle));
+
         totalBricks = 5 * 9;
         bricks = Brick.createBricks(this, 5, 9, 70, 33, 6, 55, 50);
 
@@ -52,28 +55,65 @@ public class App extends PApplet {
             paddle.update();
             paddle.display();
 
-            ball.update();
-            ball.display();
+            for (int i = balls.size() - 1; i >= 0; i--) {
+                Ball b = balls.get(i);
+                b.update();
+                b.display();
+
+                if (b.isDead()) {
+                    balls.remove(i);
+                }
+            }
 
             for (int i = bricks.size() - 1; i >= 0; i--) {
-                Brick b = bricks.get(i);
+                Brick brick = bricks.get(i);
+                boolean brickHit = false;
 
-                if (ball.ballTouchingBrick(b)) {
-                    ball.bounceOffBrick(b);
-                    bricks.remove(i);
-                    totalBricks--;
-                    score++;
-                    break;
+                for (int b = balls.size() - 1; b >= 0; b--) {
+                    Ball ball = balls.get(b);
+
+                    if (ball.ballTouchingBrick(brick)) {
+                        ball.bounceOffBrick(brick);
+                        bricks.remove(i);
+                        totalBricks--;
+                        score++;
+                        brickHit = true;
+                        if (random(1) < 0.1) {
+                            powerups.add(new Powerup(this, 30, 20,
+                                    brick.getBrickX() + brick.getBrickWidth() / 2 - 15,
+                                    brick.getBrickY() + brick.getBrickHeight() / 2 - 15,
+                                    paddle));
+                        }
+                        break;
+                    }
                 }
-                b.display();
+
+                if (brickHit == false) {
+                    brick.display();
+                }
+            }
+
+            for (int i = powerups.size() - 1; i >= 0; i--) {
+                Powerup p = powerups.get(i);
+                p.update();
+                p.display();
+
+                if (p.hitsPaddle()) {
+                    tripleBall();
+                    powerups.remove(i);
+                } else if (p.isOffScreen() == true || p.isActive() == false) {
+                    powerups.remove(i);
+                }
             }
 
             if (totalBricks == 0) {
                 regenerateBricks();
             }
 
-            if (ball.ballTouchingPaddle() == true) {
-                ball.bounce();
+            for (Ball ball : balls) {
+                if (ball.ballTouchingPaddle() == true) {
+                    ball.bounce();
+                }
             }
 
             fill(0);
@@ -84,9 +124,23 @@ public class App extends PApplet {
             textSize(16);
             text("Score: " + score, 20, 560);
             text("High Score: " + highscore, 20, 580);
+            fill(0);
+            textSize(16);
+        }
+        for (int i = powerups.size() - 1; i >= 0; i--) {
+            Powerup p = powerups.get(i);
+            p.update();
+            p.display();
+
+            if (p.hitsPaddle()) {
+                tripleBall();
+                powerups.remove(i);
+            } else if (p.isOffScreen()) {
+                powerups.remove(i);
+            }
         }
 
-        if (scene == 1 && ball.isDead()) {
+        if (scene == 1 && balls.isEmpty()) {
             if (score > highscore) {
                 gotHighScore = true;
                 highscore = score;
@@ -118,7 +172,7 @@ public class App extends PApplet {
             }
         }
 
-        if (scene == 3) {
+        if (scene == 3) { // Used ChatGPT to make formatting this screen easier
             background(40);
             fill(255, 126, 0);
             PFont font;
@@ -152,28 +206,54 @@ public class App extends PApplet {
     public void regenerateBricks() {
         totalBricks = 5 * 9;
         bricks = Brick.createBricks(this, 5, 9, 70, 33, 6, 55, 50);
-        ball.ballGoToPaddle();
+
+        if (balls.isEmpty() == false) {
+            Ball oldBall = balls.get(0);
+
+            float xS = oldBall.getBallXSpeed();
+            float yS = oldBall.getBallYSpeed();
+
+            balls.clear();
+            Ball newBall = new Ball(this, paddle, xS, yS);
+            newBall.ballGoToPaddle();
+            balls.add(newBall);
+        }
+        powerups.clear();
     }
 
     public void restartGame() {
         score = 0;
         totalBricks = 5 * 9;
         bricks = Brick.createBricks(this, 5, 9, 70, 33, 6, 55, 50);
-        ball.reset();
-        ball.ballGoToPaddle();
+        balls.clear();
+        balls.add(new Ball(this, paddle));
         scene = 1;
     }
 
     public void keyPressed() {
         if (scene == 2 && key == 'r') {
-
             restartGame();
-            ball.reset();
+            gotHighScore = false;
         }
 
         if (scene == 3 && key == ' ') {
+            gotHighScore = false;
             restartGame();
         }
+    }
+
+    public void tripleBall() {
+        ArrayList<Ball> newBalls = new ArrayList<>();
+
+        for (Ball b : balls) {
+            for (int i = 0; i < 2; i++) {
+                Ball ball = new Ball(this, paddle);
+                ball.setPosition(b.getBallX(), b.getBallY());
+                ball.setVelocity(ball.getBallXSpeed(), ball.getBallYSpeed());
+                newBalls.add(ball); // Used chatGPT to help add the balls to the arraylist at the same time
+            }
+        }
+        balls.addAll(newBalls); // Used chatGPT to help add the balls to the arraylist at the same time
     }
 
 }

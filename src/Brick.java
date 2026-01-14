@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-
 import processing.core.PApplet;
 
 public class Brick {
@@ -12,7 +11,6 @@ public class Brick {
     private float r, g, b;
     private int brickColor;
     private boolean alive = true;
-    
 
     public Brick(PApplet c, float x, float y, int width, int height) {
         canvas = c;
@@ -34,12 +32,13 @@ public class Brick {
         if (!alive) {
             return;
         }
-        
+
         canvas.fill(brickColor);
         canvas.rect(brickX, brickY, brickWidth, brickHeight);
     }
 
-    public static ArrayList<Brick> createBricks(PApplet canvas, int rows, int columns, int brickWidth, int brickHeight, int spacing, float startX, float startY) {
+    public static ArrayList<Brick> createBricks(PApplet canvas, int rows, int columns, int brickWidth, int brickHeight,
+            int spacing, float startX, float startY) {
 
         ArrayList<Brick> bricks = new ArrayList<>();
 
