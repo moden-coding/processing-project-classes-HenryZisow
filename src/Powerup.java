@@ -6,6 +6,7 @@ import java.util.*;
 public class Powerup {
     private PApplet canvas;
     private Paddle paddle;
+    private PImage image; //Used chatGPT to help make the powerup an image
 
     private int powerupWidth;
     private int powerupHeight;
@@ -16,13 +17,14 @@ public class Powerup {
     private int powerupSpeed = 2;
     private boolean active = true;
 
-    public Powerup(PApplet c, int width, int height, float x, float y, Paddle paddle) {
+    public Powerup(PApplet c, int width, int height, float x, float y, Paddle paddle, PImage image) {
         canvas = c;
         this.powerupWidth = width;
         this.powerupHeight = height;
         this.powerupX = x;
         this.powerupY = y;
         this.paddle = paddle;
+        this.image = image;
     }
 
     public void update() {
@@ -36,8 +38,7 @@ public class Powerup {
         if (active == false) {
             return;
         }
-        canvas.fill(0, 255, 150);
-        canvas.rect(powerupX, powerupY, powerupWidth, powerupHeight);
+        canvas.image(image, powerupX, powerupY, powerupWidth, powerupHeight);
     }
 
     public boolean hitsPaddle() {

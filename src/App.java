@@ -4,32 +4,35 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class App extends PApplet {
-    private ArrayList<Brick> bricks = new ArrayList<>();
-    private ArrayList<Ball> balls = new ArrayList<>();
-    private ArrayList<Powerup> powerups = new ArrayList<>();
-    private Paddle paddle = new Paddle(this);
-    private int score = 0;
-    private int highscore = 0;
-    private int totalBricks;
-    private int scene = 3;
-    private boolean gotHighScore;
+    private ArrayList<Brick> bricks = new ArrayList<>(); //Creates an arraylist for the bricks
+    private ArrayList<Ball> balls = new ArrayList<>(); //Creates an arraylist for the balls
+    private ArrayList<Powerup> powerups = new ArrayList<>(); //Creates an arraylist for the powerups
+    private Paddle paddle = new Paddle(this); //Adds a paddle to the app class
+    private int score = 0; //Initializes the game score
+    private int highscore = 0; //Starts the highscore at 0
+    private int totalBricks; //Sums up the number of bricks in its arraylist
+    private int scene = 3; //starts the game at the title screen
+    private boolean gotHighScore; //boolean to check if the score was greater than the highscore
+    private PImage tripleBallImg;  //Used chatGPT to help make the powerup an image
 
     public static void main(String[] args) {
         PApplet.main("App");
     }
 
     public void setup() {
-        readHighScore();
+        readHighScore(); //finds the highscore from the file and sets it
 
-        balls.clear();
-        balls.add(new Ball(this, paddle));
+        tripleBallImg = loadImage("tripleball.png"); //loads the powerup image
 
-        totalBricks = 5 * 9;
-        bricks = Brick.createBricks(this, 5, 9, 70, 33, 6, 55, 50);
+        balls.clear(); //removew all balls from the arraylist
+        balls.add(new Ball(this, paddle)); //adds one new ball
+
+        totalBricks = 5 * 9; //initiates a 5x9 brick formation
+        bricks = Brick.createBricks(this, 5, 9, 70, 33, 6, 55, 50); //creates the bricks
 
     }
 
-    public void readHighScore() {
+    public void readHighScore() { //reads the highscore value from the highscore.txt file
         try (Scanner scanner = new Scanner(Paths.get("highscore.txt"))) {
 
             while (scanner.hasNextLine()) {
@@ -41,59 +44,59 @@ public class App extends PApplet {
         }
     }
 
-    public void settings() {
+    public void settings() { //creates the 800x600 pixel screen
         size(800, 600);
 
     }
 
     public void draw() {
 
-        background(200);
+        background(200); //creates a gray background
         if (scene == 1) {
             background(200);
 
-            paddle.update();
-            paddle.display();
+            paddle.update(); //updates the paddles position
+            paddle.display(); //shows the paddle
 
-            for (int i = balls.size() - 1; i >= 0; i--) {
+            for (int i = balls.size() - 1; i >= 0; i--) { //Goes through the ball arraylist and repeatedly updates and displays the ball using the methods
                 Ball b = balls.get(i);
                 b.update();
                 b.display();
 
-                if (b.isDead()) {
+                if (b.isDead()) { //removes a ball if the isDead method is called
                     balls.remove(i);
                 }
             }
 
-            for (int i = bricks.size() - 1; i >= 0; i--) {
+            for (int i = bricks.size() - 1; i >= 0; i--) { //loops through the bricks and checks if they got hit
                 Brick brick = bricks.get(i);
                 boolean brickHit = false;
 
                 for (int b = balls.size() - 1; b >= 0; b--) {
                     Ball ball = balls.get(b);
 
-                    if (ball.ballTouchingBrick(brick)) {
+                    if (ball.ballTouchingBrick(brick)) { //checks if the ball is touching any of the bricks, and if it is updates the variables accordingly
                         ball.bounceOffBrick(brick);
                         bricks.remove(i);
                         totalBricks--;
                         score++;
                         brickHit = true;
-                        if (random(1) < 0.1) {
-                            powerups.add(new Powerup(this, 30, 20,
+                        if (random(1) < 0.1) { //randomly generates a float 0 to 1, and if it is less than 0.1 it spawns a powerup in
+                            powerups.add(new Powerup(this, 30, 25,
                                     brick.getBrickX() + brick.getBrickWidth() / 2 - 15,
                                     brick.getBrickY() + brick.getBrickHeight() / 2 - 15,
-                                    paddle));
+                                    paddle, tripleBallImg));
                         }
                         break;
                     }
                 }
 
-                if (brickHit == false) {
+                if (brickHit == false) { //displays bricks if they haven't been hit, but stops displaying them the moment they have been hit
                     brick.display();
                 }
             }
 
-            for (int i = powerups.size() - 1; i >= 0; i--) {
+            for (int i = powerups.size() - 1; i >= 0; i--) { //loops through the powerups arraylist and updates everything aaccordingly
                 Powerup p = powerups.get(i);
                 p.update();
                 p.display();
@@ -106,19 +109,13 @@ public class App extends PApplet {
                 }
             }
 
-            if (totalBricks == 0) {
+            if (totalBricks == 0) { //if there are no bricks left, regenerates all the bricks to how they were before the game so the player can continue playing
                 regenerateBricks();
             }
 
-            for (Ball ball : balls) {
-                if (ball.ballTouchingPaddle() == true) {
-                    ball.bounce();
-                }
-            }
-
-            fill(0);
+            fill(0); //displays the score and highscore on the screen
             PFont font;
-            font = createFont("font1.ttf", 128);
+            font = createFont("font1.ttf", 128); //used chatGPT to add a cool font
             textFont(font);
             textAlign(LEFT);
             textSize(16);

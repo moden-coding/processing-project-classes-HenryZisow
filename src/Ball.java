@@ -66,22 +66,22 @@ public class Ball {
     }
 
     public void update() {
-
-        ballX += xSpeed;
-        ballY += ySpeed;
-
-        // ballX = canvas.mouseX;
-        // ballY = canvas.mouseY;
-
-        if (ballX < ballSize / 2 || ballX > canvas.width - ballSize / 2) {
-            xSpeed *= -1;
-        }
-
-        if (ballY <= ballSize / 2 && ySpeed < 0) {
-            ySpeed *= -1;
-            ballY = ballSize / 2;
-        }
+    ballX += xSpeed;
+    ballY += ySpeed;
+    
+    if (ballX < ballSize / 2 || ballX > canvas.width - ballSize / 2) {
+        xSpeed *= -1;
     }
+
+    if (ballY <= ballSize / 2 && ySpeed < 0) {
+        ySpeed *= -1;
+        ballY = ballSize / 2;
+    }
+
+    if (ballTouchingPaddle() && ySpeed > 0) {
+        bounce();
+    }
+}
 
     public void bounce() {
         if (ySpeed > 0) {
